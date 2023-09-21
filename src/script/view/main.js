@@ -54,9 +54,16 @@ const detailMovie = () => {
 };
 
 const main = () => {
+  let isSearching = false;
   let currentPage = 1;
   const movieListElement = document.getElementById('row-list');
   const pageSelector = document.getElementById('pagination');
+  const searchForm = document.getElementById('search-form');
+  const searchInput = document.getElementById('form-input');
+  let firstPage = document.getElementById('first');
+  let secondPage = document.getElementById('second');
+  let thirdPage = document.getElementById('third');
+  let currentActivepage = pageSelector.querySelector('.page-item.active');
 
   const renderPlaceholder = () => {
     for (let index = 0; index < 20; index += 1) {
@@ -103,18 +110,37 @@ const main = () => {
     }
   };
 
+  const findMovies = async (movieName, page = 1) => {
+    try {
+      // clear child first
+      while (movieListElement.firstChild) {
+        movieListElement.removeChild(movieListElement.firstChild);
+      }
+      renderPlaceholder();
+      const result = await MovieSource.findMovie(movieName, page);
+      // clear placeholder
+      while (movieListElement.firstChild) {
+        movieListElement.removeChild(movieListElement.firstChild);
+      }
+      renderResult(result);
+    } catch (message) {
+      fallbackResult(message);
+    }
+  };
+
   // pagination handler
   pageSelector.childNodes.forEach((pageItem) => {
     pageItem.addEventListener('click', () => {
-      const currentActivepage = pageSelector.querySelector('.page-item.active');
-      const firstPage = document.getElementById('first');
-      const secondPage = document.getElementById('second');
-      const thirdPage = document.getElementById('third');
-
+      firstPage = document.getElementById('first');
+      secondPage = document.getElementById('second');
+      thirdPage = document.getElementById('third');
+      currentActivepage = pageSelector.querySelector('.page-item.active');
       if (pageItem.getAttribute('id') !== 'prev' && pageItem.getAttribute('id') !== 'next') {
         currentActivepage.classList.remove('active');
         currentPage = Number(pageItem.innerText);
-        getMovies(currentPage);
+        if (!isSearching) { getMovies(currentPage); } else {
+          findMovies(searchInput.value, currentPage);
+        }
         pageItem.classList.add('active');
       } else if (pageItem.getAttribute('id') === 'next') {
         if (currentActivepage === thirdPage) {
@@ -129,12 +155,16 @@ const main = () => {
           `;
           currentActivepage.classList.remove('active');
           currentPage += 1;
-          getMovies(currentPage);
+          if (!isSearching) { getMovies(currentPage); } else {
+            findMovies(searchInput.value, currentPage);
+          }
           firstPage.classList.add('active');
         } else {
           currentActivepage.classList.remove('active');
           currentPage += 1;
-          getMovies(currentPage);
+          if (!isSearching) { getMovies(currentPage); } else {
+            findMovies(searchInput.value, currentPage);
+          }
           if (firstPage === currentActivepage) {
             secondPage.classList.add('active');
           } else {
@@ -155,13 +185,17 @@ const main = () => {
           `;
             currentActivepage.classList.remove('active');
             currentPage -= 1;
-            getMovies(currentPage);
+            if (!isSearching) { getMovies(currentPage); } else {
+              findMovies(searchInput.value, currentPage);
+            }
             thirdPage.classList.add('active');
           }
         } else {
           currentActivepage.classList.remove('active');
           currentPage -= 1;
-          getMovies(currentPage);
+          if (!isSearching) { getMovies(currentPage); } else {
+            findMovies(searchInput.value, currentPage);
+          }
           if (thirdPage === currentActivepage) {
             secondPage.classList.add('active');
           } else {
@@ -170,6 +204,35 @@ const main = () => {
         }
       }
     });
+  });
+
+  searchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (currentPage > 1) {
+      firstPage = document.getElementById('first');
+      secondPage = document.getElementById('second');
+      thirdPage = document.getElementById('third');
+      currentActivepage = pageSelector.querySelector('.page-item.active');
+      currentActivepage.classList.remove('active');
+      firstPage.innerHTML = `
+            <a class="page-link" href="#">1</a>
+          `;
+      secondPage.innerHTML = `
+            <a class="page-link" href="#">2</a>
+          `;
+      thirdPage.innerHTML = `
+            <a class="page-link" href="#">3</a>
+          `;
+      firstPage.classList.add('active');
+    }
+    currentPage = 1;
+    isSearching = true;
+    if (searchInput.value !== '') {
+      findMovies(searchInput.value, currentPage);
+    } else {
+      isSearching = false;
+      getMovies(currentPage);
+    }
   });
 
   getMovies(currentPage);

@@ -45,6 +45,28 @@ class MovieSource {
       })
       .catch((err) => Promise.reject(err));
   }
+
+  static findMovie(movieName, page = 1) {
+    const url = `https://api.themoviedb.org/3/search/movie?query=${movieName}&page=${page}`;
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${process.env.API_ACCESS_TOKEN}`,
+      },
+    };
+
+    return fetch(url, options)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        const { results } = responseJson;
+        if (results) {
+          return Promise.resolve(results); // Return the results
+        }
+        return Promise.reject('tidak ada data!');
+      })
+      .catch((err) => Promise.reject(err));
+  }
 }
 
 export default MovieSource;
