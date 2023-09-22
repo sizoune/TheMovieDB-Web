@@ -5,27 +5,29 @@ const detailMovie = () => {
   const movieItemElement = document.querySelectorAll('movie-item');
 
   const renderDetail = (result) => {
-    const modal = document.getElementById('detail');
+    const modal = document.getElementById('detail-body');
     modal.innerHTML = `
-    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
-      <div class="modal-content">
-        <div id="detail-header" class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">${result.title}</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div id="detail-body" class="modal-body">
-          <div class="card text-bg-dark">
-            <img class="card-image img-fluid" src="https://image.tmdb.org/t/p/original/${result.backdrop_path}" alt="${result.title}" >
-            <div class="card-img-overlay">
-              <h2 class="card-text">
-                ${result.overview}
-              </h2>
-              <a href="${result.homepage}">
-                <button type="button" class="btn btn-link">Homepage</button>
-              </a>
-            </div>
+    <style>
+    @media (max-width: 768px) {
+      .overview-container {
+        max-height: 200px; /* Adjust the maximum height as needed */
+        overflow-y: auto;
+      }
+    }
+    </style>
+    <div class="card text-bg-dark">
+      <img src="https://image.tmdb.org/t/p/original/${result.backdrop_path}" class="card-img" alt="..." style="filter:blur(5px);">
+      <div class="d-flex card-img-overlay">
+        <div class="row align-items-center justify-content-evenly">
+          <div class="col-4">
+            <img class="img-fluid rounded" src="https://image.tmdb.org/t/p/w500/${result.poster_path}" alt="${result.title} Poster">
           </div>
-        </div>
+          <div class="col-4 overview-container">
+            <h3 class="card-title">${result.title}</h3>
+            <p class="card-text">${result.overview}</p>
+            <p class="card-text"><small>Release Date: ${result.release_date}</small></p>
+          </div>
+        </div>  
       </div>
     </div>
     `;
